@@ -2,26 +2,32 @@
 
 This repository contains a professional-grade, high-concurrency deployment template for AWP (Agentic Web Protocol) mining and validation. It is optimized for hardware with high logical core counts (e.g., Ryzen 9700X) and features 'Ghost-Browser' resource stripping for maximum thread saturation.
 
-## 🚀 Speed Features
-- **180 Parallel Threads**: Configured for 12 nodes with 15 parallel tasks each.
-- **Ghost-Browser Mode**: Non-essential assets (CSS, Images, Fonts) are blocked to reduce RAM footprint by 50%.
-- **Turbo Polling**: Heartbeat interval set to 2 seconds for near-instant task claims.
-- **1:1 Pinning**: Pre-configured for logical core isolation (Docker `cpuset`).
+## 🚀 Performance Blueprint (High-Yield)
+Based on establishment benchmarks, this configuration is optimized for rapid credit score building:
 
-## 🛠️ Setup Instructions
+### 1. Key Datasets
+- **Primary**: `ds_wikipedia` (Zero CAPTCHAs, high-velocity crawling).
+- **Secondary**: `ds_basic_amazon_products_active` (8x reward multiplier).
+- *Strategy*: Wikipedia accounts for high task volume, while Amazon targets higher credit rewards.
 
-### 1. Prerequisites
-- Docker & Docker Compose installed.
-- NVIDIA NIM API Key (or OpenClaw gateway).
-- AWP Wallet addresses with 'Novice' or 'Normal' tier credits.
+### 2. Environment Tuning
+- **MAX_PARALLEL**: Optimized for **15 threads** per node (180 threads total in a 12-node swarm).
+- **Heartbeat**: **2-second** refresh intervals for near-instant task claiming.
+- **Stability**: `PYTHONIOENCODING=utf-8` is enforced for Windows host stability.
 
-### 2. Configuration
-1. Clone this repository.
-2. Copy `.env.example` to `.env`.
-3. Fill in your `NVIDIA_API_KEY`.
-4. Enter your 12-word recovery phrases into the `MINER_MNEMONIC_X` variables.
+### 3. Credit & Staking
+- **Tier**: Novice (Starting Tier).
+- **Stake**: **0 AWP** (Solo Mining mode). This allows for immediate reward generation without initial capital requirement.
 
-### 3. Deploy
+## 🛠️ Setup & Security
+
+### 24-Hour Wallet Unlock (CRITICAL)
+To ensure continuous mining without signature expiration, always use a **24-hour scope**:
+```bash
+awp-wallet unlock --scope full --duration 86400
+```
+
+### Deployment
 Launch the swarm with:
 ```bash
 docker-compose up -d --build
