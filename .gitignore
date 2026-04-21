@@ -1,0 +1,11 @@
+# AWP Swarm Privacy Lock
+.env
+wallets.json
+*.log
+output/
+node_modules/
+.docker-temp/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store

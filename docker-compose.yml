@@ -1,0 +1,70 @@
+version: '3.8'
+
+# AWP Miner Swarm - Sanitized Deployment Template
+# This configuration is optimized for high-concurrency 'Ghost-Browser' mining.
+# Resource limits are tuned for a Ryzen 9700X (15 Threads per Node).
+
+services:
+  # --- VALIDATOR SERVICE ---
+  validator:
+    build: .
+    container_name: awp-validator-main
+    environment:
+      - MINE_GATEWAY_PROVIDER=nvidia
+      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY}
+      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1.5G
+    restart: unless-stopped
+    networks:
+      - miner-network
+
+  # --- MINER SWARM (NODE 1) ---
+  miner-1:
+    build: .
+    container_name: awp-miner-1
+    environment:
+      - MINE_GATEWAY_PROVIDER=nvidia
+      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY}
+      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
+      - MINER_MNEMONIC=${MINER_MNEMONIC_1}
+      - MAX_PARALLEL=15
+      - START_DELAY=0
+    deploy:
+      resources:
+        limits:
+          cpus: '1.2'
+          memory: 3.2G
+    restart: unless-stopped
+    networks:
+      - miner-network
+
+  # --- MINER SWARM (NODE 2) ---
+  miner-2:
+    build: .
+    container_name: awp-miner-2
+    environment:
+      - MINE_GATEWAY_PROVIDER=nvidia
+      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY}
+      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
+      - MINER_MNEMONIC=${MINER_MNEMONIC_2}
+      - MAX_PARALLEL=15
+      - START_DELAY=10
+    deploy:
+      resources:
+        limits:
+          cpus: '1.2'
+          memory: 3.2G
+    restart: unless-stopped
+    networks:
+      - miner-network
+
+  # Note: Additional miner nodes (3-12) can be added by duplicating the 'miner-2' 
+  # block and updating the MNEMONIC variable and START_DELAY (+10s per node).
+
+networks:
+  miner-network:
+    driver: bridge
