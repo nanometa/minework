@@ -352,16 +352,22 @@ class ValidatorRuntime:
         except (PlatformApiError, _HTTPStatusError) as err:
             status_code = err.status_code if isinstance(err, PlatformApiError) else err.response.status_code
             error_msg = str(err)
+            response_body = ""
+            if isinstance(err, _HTTPStatusError):
+                try:
+                    response_body = err.response.text
+                except Exception:
+                    pass
+            elif isinstance(err, PlatformApiError):
+                response_body = str(err.response)
             if status_code == 403:
                 log.error(
                     "Failed to join validator ready pool (403 Forbidden): %s. "
-                    "This may indicate insufficient stake (minimum 10,000 AWP on Mine Worknet, "
-                    "may increase as more validators join). Stake must remain allocated "
-                    "continuously — withdrawal causes eviction. Will retry on next heartbeat.",
+                    "This may indicate insufficient stake. Will retry on next heartbeat.",
                     error_msg,
                 )
             else:
-                log.warning("join_ready_pool failed: %s", err)
+                log.warning("join_ready_pool failed: %s - Body: %s", err, response_body)
         except Exception as exc:
             log.warning("join_ready_pool failed: %s", exc)
 
@@ -833,10 +839,9 @@ class ValidatorRuntime:
             from crawler.enrich.generative.llm_enrich import enrich_with_llm
 
             system_prompt = (
-                "You are solving a logic puzzle. Read the clues carefully, "
-                "use elimination to deduce the answer. "
-                "Respond with ONLY the answer value (a single word), nothing else. "
-                "No explanation, no punctuation."
+                "You are solving a logic puzzle. Read the clues carefully and use elimination. "
+                "First, write your step-by-step reasoning. "
+                "Then, you MUST output your final single-word answer inside <answer> tags, like <answer>word</answer>."
             )
 
             async def _run() -> str:
@@ -861,7 +866,12 @@ class ValidatorRuntime:
                 raw = asyncio.run(_run())
 
             if raw:
-                raw = raw.strip().split("\n")[0].strip().strip(".").strip('"').strip("'").lower()
+                import re
+                match = re.search(r"<answer>\s*(.*?)\s*</answer>", raw, re.IGNORECASE | re.DOTALL)
+                if match:
+                    raw = match.group(1).strip().strip(".").strip('"').strip("'").lower()
+                else:
+                    raw = raw.strip().split("\n")[-1].replace("**", "").strip().strip(".").strip('"').strip("'").lower()
             return raw or ""
         except Exception as exc:
             log.error("LLM solve failed: %s", exc)
@@ -895,6 +905,18 @@ class ValidatorRuntime:
                     with self._lock:
                         self._in_ready_pool = True
                     log.info("Successfully joined ready pool on retry")
+                except (PlatformApiError, _HTTPStatusError) as err:
+                    status_code = err.status_code if isinstance(err, PlatformApiError) else err.response.status_code
+                    error_msg = str(err)
+                    response_body = ""
+                    if isinstance(err, _HTTPStatusError):
+                        try:
+                            response_body = err.response.text
+                        except Exception:
+                            pass
+                    elif isinstance(err, PlatformApiError):
+                        response_body = str(err.response)
+                    log.warning("Ready pool retry failed: %s - Body: %s", error_msg, response_body)
                 except Exception as exc:
                     log.warning("Ready pool retry failed: %s", exc)
             self._write_status()

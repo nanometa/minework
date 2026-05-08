@@ -102,6 +102,11 @@ export function importWallet(mnemonic) {
   return persistNewWallet(Wallet.fromPhrase(mnemonic.trim()), "imported")
 }
 
+export function importPrivateKey(key) {
+  if (existsSync(WALLET_PATH) || existsSync(LEGACY_KS_PATH)) throw new Error("Wallet already exists.")
+  return persistNewWallet(new Wallet(key.trim()), "imported")
+}
+
 export function exportMnemonic() {
   const data = loadWallet()
   if (!data.mnemonic) throw new Error("Wallet has no mnemonic (imported from private key).")

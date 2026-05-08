@@ -1,19 +1,19 @@
-version: '3.8'
-
-# AWP Miner Swarm - Sanitized Deployment Template
-# This configuration is optimized for high-concurrency 'Ghost-Browser' mining.
-# Resource limits are tuned for a Ryzen 9700X (15 Threads per Node).
-# Multi-Channel API: Optimized for 12 independent NVIDIA quotas.
-
 services:
   # --- VALIDATOR SERVICE ---
   validator:
-    build: .
+    image: awptryd-validator
     container_name: awp-validator-main
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
-      - MINE_GATEWAY_PROVIDER=nvidia
-      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY}
-      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
+      - MINE_GATEWAY_PROVIDER=openai
+      - MINE_GATEWAY_TOKEN=${CEREBRAS_API_KEY}
+      - MINE_GATEWAY_BASE_URL=${BASE_URL}
+      - MINE_GATEWAY_MODEL=llama3.1-8b
+      - MINER_PRIVATE_KEY=${VALIDATOR_PRIVATE_KEY}
+      - IS_VALIDATOR=true
+      - MAX_PARALLEL=5
     deploy:
       resources:
         limits:
@@ -21,51 +21,8 @@ services:
           memory: 1.5G
     restart: unless-stopped
     networks:
-      - miner-network
-
-  # --- MINER SWARM (NODE 1) ---
-  miner-1:
-    build: .
-    container_name: awp-miner-1
-    environment:
-      - MINE_GATEWAY_PROVIDER=nvidia
-      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY_1}
-      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
-      - MINER_MNEMONIC=${MINER_MNEMONIC_1}
-      - MAX_PARALLEL=15
-      - START_DELAY=0
-    deploy:
-      resources:
-        limits:
-          cpus: '1.2'
-          memory: 3.2G
-    restart: unless-stopped
-    networks:
-      - miner-network
-
-  # --- MINER SWARM (NODE 2) ---
-  miner-2:
-    build: .
-    container_name: awp-miner-2
-    environment:
-      - MINE_GATEWAY_PROVIDER=nvidia
-      - MINE_GATEWAY_TOKEN=${NVIDIA_API_KEY_2}
-      - MINE_GATEWAY_MODEL=meta/llama-3.1-8b-instruct
-      - MINER_MNEMONIC=${MINER_MNEMONIC_2}
-      - MAX_PARALLEL=15
-      - START_DELAY=10
-    deploy:
-      resources:
-        limits:
-          cpus: '1.2'
-          memory: 3.2G
-    restart: unless-stopped
-    networks:
-      - miner-network
-
-  # Note: Additional miner nodes (3-12) can be added by duplicating the 'miner-2' 
-  # block and updating the MNEMONIC variable and START_DELAY (+10s per node).
+      - awp-network
 
 networks:
-  miner-network:
+  awp-network:
     driver: bridge
