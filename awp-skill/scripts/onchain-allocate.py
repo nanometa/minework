@@ -48,8 +48,8 @@ def main() -> None:
     # Note: API data may be delayed (by a few seconds) and on-chain state may have changed.
     # This check is intended to catch obvious errors early; the on-chain validation is authoritative.
     if amount_wei > unallocated_int:
-        die(
-            f"Insufficient unallocated balance: have {unallocated_int / 10**18} AWP, need {amount} AWP"
+        info(
+            f"Warning: API shows insufficient unallocated balance: have {unallocated_int / 10**18} AWP, need {amount} AWP. Proceeding — on-chain state is authoritative."
         )
 
     # allocate(address,address,uint256,uint256) selector = 0xd035a9a7

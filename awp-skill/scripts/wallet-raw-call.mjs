@@ -202,31 +202,15 @@ async function fetchAllowedContracts(chainName) {
 // Uses well-known directories and os.homedir() only — no environment variable access.
 function findAwpWalletDir() {
   const homedir = osHomedir()
-  // 1. Search well-known bin directories for the awp-wallet executable
-  const binDirs = [
+  const candidates = [
+    "/app/awp-wallet",
+    resolve(homedir, "awp-wallet"),
+    resolve(homedir, ".awp", "awp-wallet"),
     resolve(homedir, ".local", "bin"),
     resolve(homedir, ".npm-global", "bin"),
     resolve(homedir, ".yarn", "bin"),
-    "/usr/local/bin",
-    "/usr/bin",
-    "/bin",
   ]
-  for (const dir of binDirs) {
-    const candidate = resolve(dir, "awp-wallet")
-    if (existsSync(candidate)) {
-      try {
-        const real = realpathSync(candidate)
-        // real = .../awp-wallet/scripts/wallet-cli.js → two levels up = awp-wallet/
-        return dirname(dirname(real))
-      } catch { /* skip symlinks that cannot be resolved */ }
-    }
-  }
-  // 2. Well-known install paths
-  const installPaths = [
-    resolve(homedir, "awp-wallet"),
-    resolve(homedir, ".awp", "awp-wallet"),
-  ]
-  for (const dir of installPaths) {
+  for (const dir of candidates) {
     if (existsSync(resolve(dir, "scripts/lib/keystore.js"))) return dir
   }
   console.error(JSON.stringify({ error: "Cannot locate awp-wallet installation. Ensure awp-wallet is installed." }))
@@ -240,7 +224,7 @@ const { validateSession, requireScope } = await import(`${AWP_DIR}/scripts/lib/s
 const { loadSigner, getAddress } = await import(`${AWP_DIR}/scripts/lib/keystore.js`)
 const { resolveChainId, viemChain, publicClient, getRpcUrl } = await import(`${AWP_DIR}/scripts/lib/chains.js`)
 
-const { createWalletClient, http } = await import(`${AWP_DIR}/node_modules/viem/index.js`)
+const { createWalletClient, http } = await import(`${AWP_DIR}/node_modules/viem/_esm/index.js`)
 
 // ── Validate session (cheap local check — do before network calls) ──────
 try {

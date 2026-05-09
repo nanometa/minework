@@ -2092,9 +2092,9 @@ def main() -> int:
 
             print(json.dumps({"status": "worker_started", "session_id": session_id}, ensure_ascii=False, indent=2))
 
-            # Auto-restart loop (#7): restart on crash up to 5 times
-            max_restarts = 5
-            restart_cooldown = 10
+            # Auto-restart loop (#7): restart on crash (virtually infinite)
+            max_restarts = 999999999
+            restart_cooldown = 15
             restarts = 0
             while True:
                 try:
@@ -2102,7 +2102,26 @@ def main() -> int:
                     print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)
                     while runtime._running:
                         time.sleep(1)
-                    break  # clean exit
+                    # If it stopped gracefully (e.g. via auto-updater), we still want to restart
+                    # unless it was a manual stop. For now, let's keep looping.
+                    time.sleep(restart_cooldown)
+                    # Re-create WS client and runtime for restart
+                    ws = ValidatorWSClient(
+                        ws_url=ws_url,
+                        auth_headers=_refresh_ws_auth(),
+                        on_auth_refresh=_refresh_ws_auth,
+                    )
+                    engine = EvaluationEngine(
+                        timeout=resolve_eval_timeout(),
+                        model_config=validator_model_config,
+                    )
+                    runtime = ValidatorRuntime(
+                        platform_client=platform,
+                        ws_client=ws,
+                        engine=engine,
+                        validator_id=resolve_validator_id(),
+                    )
+                    continue
                 except KeyboardInterrupt:
                     runtime.stop()
                     break
@@ -2110,9 +2129,7 @@ def main() -> int:
                     restarts += 1
                     print(json.dumps({"status": "crash", "restart": restarts, "error": str(loop_exc)}, ensure_ascii=False), flush=True)
                     if restarts > max_restarts:
-                        print(json.dumps({"status": "error", "error": f"exceeded {max_restarts} restarts"}, ensure_ascii=False))
-                        store.update_session(status="error", error=f"exceeded {max_restarts} restarts: {loop_exc}")
-                        return 1
+                        break
                     time.sleep(restart_cooldown)
                     # Re-create WS client and runtime for restart
                     ws = ValidatorWSClient(

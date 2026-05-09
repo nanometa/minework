@@ -108,7 +108,7 @@ class ValidatorWSClient:
             self._ws = ws_sync.connect(
                 self._ws_url,
                 additional_headers=extra_headers,
-                open_timeout=15,
+                open_timeout=30,
                 close_timeout=5,
             )
             self._connected = True

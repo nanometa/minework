@@ -67,16 +67,18 @@ class PlatformClient:
             if eip712_verifying_contract is not None
             else signature_config.get("verifying_contract", DEFAULT_EIP712_VERIFYING_CONTRACT)
         )
-        self._max_retries = 3
+        self._max_retries = 10
         self._last_wallet_refresh: dict[str, Any] | None = None
         headers = {
             "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "X-Worknet-Id": "845300000002",
         }
         if token.strip():
             headers["Authorization"] = f"Bearer {token}"
         self._client = httpx.Client(
             base_url=self._base_url,
-            timeout=30.0,
+            timeout=60.0,
             headers=headers,
         )
 

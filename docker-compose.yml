@@ -11,14 +11,17 @@ services:
       - MINE_GATEWAY_TOKEN=${CEREBRAS_API_KEY}
       - MINE_GATEWAY_BASE_URL=${BASE_URL}
       - MINE_GATEWAY_MODEL=llama3.1-8b
+      - VALIDATOR_PRIVATE_KEY=${VALIDATOR_PRIVATE_KEY}
       - MINER_PRIVATE_KEY=${VALIDATOR_PRIVATE_KEY}
       - IS_VALIDATOR=true
-      - MAX_PARALLEL=5
+      - MAX_PARALLEL=10
+      - DATASET_REFRESH_SECONDS=${DATASET_REFRESH_SECONDS:-2}
+      - PYTHONIOENCODING=utf-8
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1.5G
+          cpus: '1.5'
+          memory: 2G
     restart: unless-stopped
     networks:
       - awp-network

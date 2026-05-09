@@ -80,6 +80,7 @@ class ValidatorRuntime:
             "tasks_mismatch": 0,
             "errors": 0,
             "consecutive_failures": 0,
+            "consecutive_heartbeat_failures": 0,
         }
         self._start_time = time.monotonic()
         # Dynamically updated from heartbeat response
@@ -943,4 +944,13 @@ class ValidatorRuntime:
             log.debug("Heartbeat sent")
         except Exception as exc:
             log.warning("Heartbeat failed: %s", exc)
+            with self._stats_lock:
+                self._stats["consecutive_heartbeat_failures"] += 1
+                fails = self._stats["consecutive_heartbeat_failures"]
+            if fails >= 10:
+                log.error("Heartbeat failed 10 times in a row — triggering self-recovery restart")
+                self.stop()
+        else:
+            with self._stats_lock:
+                self._stats["consecutive_heartbeat_failures"] = 0
 

@@ -25,7 +25,7 @@ def resolve_mine_gateway_model_config() -> dict[str, Any]:
         "provider": _env_value("MINE_GATEWAY_PROVIDER", default="openclaw"),
         "base_url": _env_value("MINE_GATEWAY_BASE_URL", "OPENCLAW_GATEWAY_BASE_URL", default=DEFAULT_GATEWAY_BASE_URL),
         "api_key": token,
-        "model": _env_value("MINE_ENRICH_MODEL", "OPENCLAW_ENRICH_MODEL", default=DEFAULT_GATEWAY_MODEL),
+        "model": _env_value("MINE_ENRICH_MODEL", "MINE_GATEWAY_MODEL", "OPENCLAW_ENRICH_MODEL", "OPENCLAW_GATEWAY_MODEL", default=DEFAULT_GATEWAY_MODEL),
     }
     upstream_model = _env_value("MINE_UPSTREAM_MODEL", "OPENCLAW_UPSTREAM_MODEL")
     if upstream_model:
