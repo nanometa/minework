@@ -1,0 +1,25 @@
+Bonjour Antigravity (ou assistant IA),
+
+Je souhaite déployer un validateur AWP Minework en utilisant le dépôt GitHub de mon ami. Voici les instructions spécifiques pour que tout fonctionne immédiatement :
+
+1. PRÉPARATION DU VPS (Si Docker n'est pas installé) :
+Exécuter : `curl -fsSL https://get.docker.com | sh`
+
+2. CLONE DU REPOSITORY :
+Cloner ce dépôt : https://github.com/nanometa/minework.git
+
+2. CONFIGURATION DE L'ENVIRONNEMENT :
+Créer un fichier `.env` à la racine avec les informations suivantes :
+- CEREBRAS_API_KEY= (Mettre ma propre clé API Cerebras)
+- VALIDATOR_PRIVATE_KEY= (Mettre ma propre clé privée de portefeuille)
+- WORKNET_ID= (Mettre l'ID de mon Worknet, ex: 845300000002)
+
+3. LANCEMENT :
+Lancer le validateur avec Docker Compose : `docker compose up -d`
+
+4. POINTS CRITIQUES À VÉRIFIER :
+- Le code contient déjà les corrections pour le "Mine Worknet" (ID: 845300000002).
+- Le validateur possède un système d'auto-retry et d'auto-restart en cas d'erreur de réseau ou de lag de l'API AWP.
+- Assurez-vous que le stake de 10 000 AWP minimum est bien alloué à l'adresse du validateur sur le Worknet 845300000002.
+
+Ne modifie pas la logique du validateur dans `validator_runtime.py` car elle a été optimisée pour la résilience. Contente-toi de configurer l'environnement et de lancer les conteneurs.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import time
 from typing import TYPE_CHECKING, Any
@@ -72,7 +73,7 @@ class PlatformClient:
         headers = {
             "Content-Type": "application/json",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "X-Worknet-Id": "845300000002",
+            "X-Worknet-Id": os.getenv("WORKNET_ID", "845300000002"),
         }
         if token.strip():
             headers["Authorization"] = f"Bearer {token}"
